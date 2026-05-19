@@ -30,6 +30,7 @@ async function run() {
 
         const db = client.db("CarRent")
         const carrentCollection = db.collection("carrent")
+        const BookingCollection = db.collection("booking")
 
 
 
@@ -57,7 +58,7 @@ async function run() {
 
 
 
-        // const BookingCollection = db.collection("booking")
+
         //get api
 
         app.get('/AddCar', async (req, res) => {
@@ -83,6 +84,47 @@ async function run() {
             res.json(result)
         })
 
+
+
+        app.patch("/booking/:id", async (req, res) => {
+            const { id } = req.params
+            const updateData = req.body
+            console.log(updateData)
+
+            const result = await BookingCollection.updateMany(
+
+                { _id: new ObjectId(id) },
+                { $set: updateData }
+
+            )
+            res.json(result)
+        })
+
+        app.delete('/booking/:id', async (req, res) => {
+            const { id } = req.params;
+
+            const result = await BookingCollection.deleteOne({
+                _id: new ObjectId(id)
+            });
+
+            res.json(result);
+        });
+
+
+        //car booking data GET api
+        app.get('/booking/:userId', async (req, res) => {
+            const { userId } = req.params;
+            const result = await BookingCollection.find({ userId: userId }).toArray();
+            res.json(result);
+        });
+
+        //car booking data post api
+        app.post('/booking', async (req, res) => {
+            const bookingData = req.body
+            const result = await BookingCollection.insertOne(bookingData)
+
+            res.send(result);
+        })
 
 
         await client.connect();
