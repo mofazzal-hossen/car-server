@@ -31,6 +31,32 @@ async function run() {
         const db = client.db("CarRent")
         const carrentCollection = db.collection("carrent")
 
+
+
+        //  SEARCH + FILTER API
+        app.get("/AddCar", async (req, res) => {
+
+            const search = req.query.search;
+
+            let filter = {};
+
+            if (search) {
+                filter = {
+                    $or: [
+                        { carName: { $regex: search, $options: "i" } },
+                        { brand: { $regex: search, $options: "i" } },
+                    ],
+                };
+            }
+
+            const result = await carrentCollection.find(filter).toArray();
+
+            res.send(result);
+        });
+
+
+
+
         // const BookingCollection = db.collection("booking")
         //get api
 
@@ -56,7 +82,6 @@ async function run() {
             const result = await carrentCollection.findOne({ _id: new ObjectId(id) })
             res.json(result)
         })
-
 
 
 
