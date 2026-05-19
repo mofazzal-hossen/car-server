@@ -34,10 +34,10 @@ async function run() {
         // const BookingCollection = db.collection("booking")
         //get api
 
-        // app.get('/ExploreDestinations', async (req, res) => {
-        //     const response = await DestinationCollection.find().toArray();
-        //     res.json(response);
-        // })
+        app.get('/AddCar', async (req, res) => {
+            const response = await carrentCollection.find().toArray();
+            res.json(response);
+        })
 
 
         //post api
@@ -49,6 +49,14 @@ async function run() {
         })
 
         //single id for api 
+
+
+        app.get('/AddCar/:id', async (req, res) => {
+            const { id } = req.params
+            const result = await carrentCollection.findOne({ _id: new ObjectId(id) })
+            res.json(result)
+        })
+
 
 
 
