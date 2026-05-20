@@ -2,6 +2,9 @@ import express from 'express'
 import 'dotenv/config'
 import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 import cors from "cors";
+import * as jose from 'jose-cjs';
+import { SignJWT } from 'jose-cjs/jwt/sign';
+import { jwtVerify } from 'jose-cjs/jwt/verify';
 
 
 
@@ -22,6 +25,38 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+// i thing 
+const JWKS = jose.createRemoteJWKSet(
+    new URL("http://localhost:3000/api/auth/jwks")
+)
+// 
+
+const verifyToken = async (req, res, next) => {
+    const verifyHeader = req?.headers.authorization
+    if (!verifyHeader) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    const token = verifyHeader.split(" ")[1]
+    if (!token) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+
+    try {
+        const { payload } = await jwtVerify(token, JWKS)
+        console.log(payload)
+        next()
+    } catch (error) {
+        return res.status(403).json({ message: "Forbidden" });
+
+    }
+
+    // console.log(token)
+
+
+
+}
 
 async function run() {
     try {
@@ -61,7 +96,7 @@ async function run() {
 
 
 
-        //get api
+        //get all api
 
         app.get('/AddCar', async (req, res) => {
             const response = await carrentCollection.find().toArray();
@@ -77,10 +112,10 @@ async function run() {
             res.json(result)
         })
 
-        //single id for api 
 
 
-        app.get('/AddCar/:id', async (req, res) => {
+        // Used middleware
+        app.get('/AddCar/:id', verifyToken, async (req, res,) => {
             const { id } = req.params
             const result = await carrentCollection.findOne({ _id: new ObjectId(id) })
             res.json(result)
@@ -120,8 +155,10 @@ async function run() {
             res.json(result);
         });
 
+
         //car booking data post api
-        app.post('/booking', async (req, res) => {
+        // used in middle
+        app.post('/booking', verifyToken, async (req, res) => {
             const bookingData = req.body
             const result = await BookingCollection.insertOne(bookingData)
 
