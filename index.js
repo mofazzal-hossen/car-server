@@ -86,12 +86,12 @@ async function run() {
 
 
 
-        app.patch("/booking/:id", async (req, res) => {
+        app.patch("/AddCar/:id", async (req, res) => {
             const { id } = req.params
             const updateData = req.body
             console.log(updateData)
 
-            const result = await BookingCollection.updateMany(
+            const result = await carrentCollection.updateOne(
 
                 { _id: new ObjectId(id) },
                 { $set: updateData }
@@ -100,10 +100,10 @@ async function run() {
             res.json(result)
         })
 
-        app.delete('/booking/:id', async (req, res) => {
+        app.delete('/AddCar/:id', async (req, res) => {
             const { id } = req.params;
 
-            const result = await BookingCollection.deleteOne({
+            const result = await carrentCollection.deleteOne({
                 _id: new ObjectId(id)
             });
 
@@ -125,6 +125,37 @@ async function run() {
 
             res.send(result);
         })
+
+
+        //my added car 
+        // app.get("/my-addCar", async (req, res) => {
+        //     const email = req.query.email;
+
+        //     const query = { createdBy: email };
+
+        //     const cursor = carrentCollection.find(query);
+        //     const myAddCars = await cursor.toArray();
+
+        //     res.send(myAddCars);
+        // });
+
+
+        app.get("/my-addCar", async (req, res) => {
+
+            const email = req.query.email;
+            console.log(email)
+
+            const query = {
+                createdBy: email
+            };
+
+            const myAddCars = await carrentCollection
+                .find(query)
+                .toArray();
+
+            res.send(myAddCars);
+        });
+
 
 
         await client.connect();
