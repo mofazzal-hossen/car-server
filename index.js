@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 import cors from "cors";
 
-// 🔴 VERY BAD (backend এ frontend import করা যাবে না)
+
 
 
 const uri = process.env.DB_URI;
@@ -40,17 +40,19 @@ async function run() {
             const search = req.query.search;
 
             let filter = {};
-
-            if (search) {
+            let result;
+            if (search && search !== "undefined") {
                 filter = {
                     $or: [
                         { carName: { $regex: search, $options: "i" } },
                         { brand: { $regex: search, $options: "i" } },
                     ],
                 };
+                result = await carrentCollection.find(filter).toArray();
+            } else {
+                result = await carrentCollection.find(filter).toArray();
             }
 
-            const result = await carrentCollection.find(filter).toArray();
 
             res.send(result);
         });
